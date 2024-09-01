@@ -1,0 +1,12 @@
+services:
+  rate-limited-notification-service-db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=notification
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres-data:/tmp/postgres/data

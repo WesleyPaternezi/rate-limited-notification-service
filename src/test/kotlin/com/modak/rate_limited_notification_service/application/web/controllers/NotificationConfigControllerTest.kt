@@ -1,0 +1,3 @@
+package com.modak.rate_limited_notification_service.application.web.controllers
+
+class NotificationConfigControllerTest

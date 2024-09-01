@@ -1,0 +1,6 @@
+package com.modak.rate_limited_notification_service.resources.repositories
+
+import org.springframework.stereotype.Repository
+
+@Repository
+class NotificationConfigRepositoryImpl
