@@ -1,6 +1,6 @@
 package com.modak.rate_limited_notification_service.application.web.handler
 
-import com.modak.rate_limited_notification_service.domain.exception.UnprocessableNotification
+import com.modak.rate_limited_notification_service.domain.exception.UnprocessableNotificationException
 import org.apache.coyote.BadRequestException
 import org.springframework.data.crossstore.ChangeSetPersister
 import org.springframework.http.HttpStatus
@@ -48,8 +48,8 @@ class ErrorHandler {
         )
     }
 
-    @ExceptionHandler(UnprocessableNotification::class)
-    fun handleUnprocessableNotification(ex: UnprocessableNotification): ResponseEntity<ExceptionResponse> {
+    @ExceptionHandler(UnprocessableNotificationException::class)
+    fun handleUnprocessableNotification(ex: UnprocessableNotificationException): ResponseEntity<ExceptionResponse> {
         return buildExceptionResponse(
             httpStatus = HttpStatus.UNPROCESSABLE_ENTITY,
             message = ex.localizedMessage,

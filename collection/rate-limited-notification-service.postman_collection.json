@@ -1,0 +1,145 @@
+{
+	"info": {
+		"_postman_id": "aae63534-21b6-4a4c-8071-256934746119",
+		"name": "rate-limited-notification-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31136225"
+	},
+	"item": [
+		{
+			"name": "notification",
+			"item": [
+				{
+					"name": "notify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": \"user-1\",\r\n  \"notification_type\": \"email\",\r\n  \"content_body\": \"any\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/notification/notify",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"notification",
+								"notify"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "notification-config",
+			"item": [
+				{
+					"name": "/notification-config",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"notification_type\": \"email\",\r\n  \"rate_limit_interval\": 1,\r\n  \"rate_limit_count\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/notification-config",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"notification-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/notification-config/{notificationType}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/notification-config/email",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"notification-config",
+								"email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/notification-config",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"notification_type\": \"email\",\r\n  \"rate_limit_interval\": 10,\r\n  \"rate_limit_count\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/notification-config",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"notification-config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/notification-config/{notificationType}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/notification-config/emails",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"notification-config",
+								"emails"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -3,7 +3,7 @@ package com.modak.rate_limited_notification_service.domain.services
 import com.modak.rate_limited_notification_service.domain.entities.NotificationConfigEntity
 import com.modak.rate_limited_notification_service.domain.entities.NotificationEntity
 import com.modak.rate_limited_notification_service.domain.entities.toModel
-import com.modak.rate_limited_notification_service.domain.exception.UnprocessableNotification
+import com.modak.rate_limited_notification_service.domain.exception.UnprocessableNotificationException
 import com.modak.rate_limited_notification_service.domain.models.NotificationModel
 import com.modak.rate_limited_notification_service.domain.repositories.NotificationConfigRepository
 import com.modak.rate_limited_notification_service.domain.repositories.NotificationRepository
@@ -39,7 +39,7 @@ class NotificationService(
         }
 
         if (filteredListByInterval.count() >= notificationConfigModel.rateLimitCount) {
-            throw UnprocessableNotification("Rate limit exceeded: ${notificationConfigModel.notificationType}, for user: ${listNotification[0]?.userId}")
+            throw UnprocessableNotificationException("Rate limit exceeded: ${notificationConfigModel.notificationType}, for user: ${listNotification[0]?.userId}")
         }
         return true
     }
@@ -47,27 +47,24 @@ class NotificationService(
     @Transactional
     fun sendAndPersistNotification(notificationModel: NotificationModel) {
         val getNotificationConfig = findNotificationConfig(notificationModel.notificationType)
-            ?: throw UnprocessableNotification("Notification config not found: ${notificationModel.notificationType}")
+            ?: throw UnprocessableNotificationException("Notification config not found: ${notificationModel.notificationType}")
 
         val getUserNotificationByType =
             findAllUserNotificationType(notificationModel.userId, notificationModel.notificationType)
 
         validateNotificationByRateIntervalAndRateCount(getUserNotificationByType, getNotificationConfig)
 
-        try {
-            notificationRepository.save(
-                NotificationEntity(
-                    id = null,
-                    userId = notificationModel.userId,
-                    notificationType = notificationModel.notificationType,
-                    contentBody = notificationModel.contentBody,
-                    createdAt = notificationModel.createdAt
-                )
+        notificationRepository.save(
+            NotificationEntity(
+                id = null,
+                userId = notificationModel.userId,
+                notificationType = notificationModel.notificationType,
+                contentBody = notificationModel.contentBody,
+                createdAt = notificationModel.createdAt
             )
-        } catch (ex: Exception) {
-            throw ex
-        }
+        )
     }
+}
 
 
 //    TODO implement bulk
@@ -112,4 +109,3 @@ class NotificationService(
 //            listInvalidNotification = listInvalidNotification
 //        )
 //    }
-}
