@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    id("org.springframework.boot") version "3.3.3"
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.spring") version "1.9.0"
+    id("org.springframework.boot") version "3.2.0"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.3.72"
     id("org.flywaydb.flyway") version "8.0.3"
@@ -19,6 +19,7 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
 }
 
 dependencies {
@@ -42,6 +43,9 @@ dependencies {
     //JACOCO
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jacoco:org.jacoco.agent:0.8.7")
+
+    //FEIGN
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 }
 
 kotlin {
@@ -52,4 +56,10 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.0")
+    }
 }

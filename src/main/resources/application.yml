@@ -17,3 +17,14 @@ spring:
     flyway:
       enabled: true
       locations: classpath:db/migration
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: BASIC
+
+config:
+  notification-url: ${NOTIFICATION_GATEWAY_URL}

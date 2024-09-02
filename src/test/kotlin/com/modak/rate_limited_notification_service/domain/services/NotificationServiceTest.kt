@@ -5,10 +5,13 @@ import com.modak.rate_limited_notification_service.application.web.requests.toMo
 import com.modak.rate_limited_notification_service.domain.entities.NotificationConfigEntity
 import com.modak.rate_limited_notification_service.domain.entities.NotificationEntity
 import com.modak.rate_limited_notification_service.domain.exception.UnprocessableNotificationException
+import com.modak.rate_limited_notification_service.domain.gateway.NotificationGateway
 import com.modak.rate_limited_notification_service.domain.repositories.NotificationConfigRepository
 import com.modak.rate_limited_notification_service.domain.repositories.NotificationRepository
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -17,9 +20,10 @@ import java.time.LocalDateTime
 class NotificationServiceTest {
     private val notificationRepositoryMockk: NotificationRepository = mockk<NotificationRepository>()
     private val notificationConfigRepositoryMockk: NotificationConfigRepository = mockk<NotificationConfigRepository>()
+    private val notificationGatewayMock: NotificationGateway = mockk<NotificationGateway>()
 
     private val service: NotificationService =
-        NotificationService(notificationRepositoryMockk, notificationConfigRepositoryMockk)
+        NotificationService(notificationRepositoryMockk, notificationConfigRepositoryMockk, notificationGatewayMock)
 
     @Test
     fun `should throws UnprocessableNotification when notification config not found`() {
@@ -106,6 +110,8 @@ class NotificationServiceTest {
             )
         )
 
+        every { notificationGatewayMock.send(any(), any(), any()) } just runs
+
         every { notificationRepositoryMockk.save(any()) } returns NotificationEntity(
             id = 1,
             userId = notificationRequest.userId,
@@ -118,6 +124,47 @@ class NotificationServiceTest {
         verify(exactly = 1) {
             notificationConfigRepositoryMockk.findByNotificationType(any())
             notificationRepositoryMockk.findAllByUserIdAndNotificationType(any(), any())
+            notificationGatewayMock.send(any(), any(), any())
+            notificationRepositoryMockk.save(any())
+        }
+    }
+
+    @Test
+    fun `should try to send a notification but NotificationGateway throws an exception`() {
+
+        val notificationRequest = NotificationRequest(
+            userId = "test",
+            notificationType = "test",
+            contentBody = "test"
+        )
+
+        every { notificationConfigRepositoryMockk.findByNotificationType(any()) } returns NotificationConfigEntity(
+            notificationType = "test",
+            rateLimitCount = 2,
+            rateLimitInterval = 2
+        )
+
+        every { notificationRepositoryMockk.findAllByUserIdAndNotificationType(any(), any()) } returns listOf(
+            NotificationEntity(
+                userId = "test",
+                notificationType = "test",
+                contentBody = "test"
+            )
+        )
+
+        every { notificationGatewayMock.send(any(), any(), any()) } throws Exception()
+
+        assertThrows<Exception> {
+            service.sendAndPersistNotification(notificationRequest.toModel())
+        }
+
+        verify(exactly = 1) {
+            notificationConfigRepositoryMockk.findByNotificationType(any())
+            notificationRepositoryMockk.findAllByUserIdAndNotificationType(any(), any())
+            notificationGatewayMock.send(any(), any(), any())
+        }
+
+        verify(exactly = 0) {
             notificationRepositoryMockk.save(any())
         }
     }

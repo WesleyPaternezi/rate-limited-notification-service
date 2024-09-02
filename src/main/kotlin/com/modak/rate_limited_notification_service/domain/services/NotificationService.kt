@@ -4,6 +4,7 @@ import com.modak.rate_limited_notification_service.domain.entities.NotificationC
 import com.modak.rate_limited_notification_service.domain.entities.NotificationEntity
 import com.modak.rate_limited_notification_service.domain.entities.toModel
 import com.modak.rate_limited_notification_service.domain.exception.UnprocessableNotificationException
+import com.modak.rate_limited_notification_service.domain.gateway.NotificationGateway
 import com.modak.rate_limited_notification_service.domain.models.NotificationModel
 import com.modak.rate_limited_notification_service.domain.repositories.NotificationConfigRepository
 import com.modak.rate_limited_notification_service.domain.repositories.NotificationRepository
@@ -16,6 +17,7 @@ import java.time.LocalDateTime
 class NotificationService(
     private val notificationRepository: NotificationRepository,
     private val notificationConfigRepository: NotificationConfigRepository,
+    private val notificationGateway: NotificationGateway
 
     ) {
 
@@ -54,15 +56,26 @@ class NotificationService(
 
         validateNotificationByRateIntervalAndRateCount(getUserNotificationByType, getNotificationConfig)
 
-        notificationRepository.save(
-            NotificationEntity(
-                id = null,
+        try {
+            notificationGateway.send(
                 userId = notificationModel.userId,
-                notificationType = notificationModel.notificationType,
-                contentBody = notificationModel.contentBody,
-                createdAt = notificationModel.createdAt
+                message = notificationModel.contentBody?: "",
+                notificationType = notificationModel.notificationType
             )
-        )
+            notificationRepository.save(
+                NotificationEntity(
+                    id = null,
+                    userId = notificationModel.userId,
+                    notificationType = notificationModel.notificationType,
+                    contentBody = notificationModel.contentBody,
+                    createdAt = notificationModel.createdAt
+                )
+            )
+        } catch (ex: Exception){
+            throw UnprocessableNotificationException(
+                ex.localizedMessage,
+            )
+        }
     }
 }
 
